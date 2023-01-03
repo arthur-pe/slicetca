@@ -14,6 +14,11 @@ ___
 pip install slicetca
 ```
 
+## Full documentation
+
+The full documentation can be found [here]().
+
+---
 
 ## Examples
 
@@ -36,10 +41,8 @@ components, _ = decompose(data, (2,0,3))
 
 See the [example notebook]() for an application of the method to publicly available data.
 
-## Full documentation
-
-The full documentation can be found [here]().
+---
 
 ## Reference
 
-A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>, 2023, Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. Biorxiv:.
+A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>. (2023). Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. [Biorxiv:]().
