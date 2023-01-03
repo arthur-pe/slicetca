@@ -1,7 +1,15 @@
+from slicetca._core.decompositions import SliceTCA
+
 import torch
+from typing import Sequence
 
-
-def mm(a, b):
+def mm(a: torch.Tensor, b: torch.Tensor):
+    """
+    Performs generalized matrix multiplication (ijq) x (qkl) -> (ijkl)
+    :param a: torch
+    :param b:
+    :return:
+    """
     temp1 = [chr(105+i) for i in range(len(a.size()))]
     temp2 = [chr(105+len(a.size())-1+i) for i in range(len(b.size()))]
     indexes1 = ''.join(temp1)
@@ -11,7 +19,7 @@ def mm(a, b):
     return torch.einsum(formula,[a,b])
 
 
-def batch_outer(a, b):
+def batch_outer(a: torch.Tensor, b: torch.Tensor):
     temp1 = [chr(105 + i + 1) for i in range(len(a.size()) - 1)]
     temp2 = [chr(105 + len(a.size()) + i + 1) for i in range(len(b.size()) - 1)]
     indexes1 = ''.join(temp1)
@@ -20,7 +28,12 @@ def batch_outer(a, b):
     return torch.einsum(formula, [a, b])
 
 
-def construct_per_type(model, components):
+def construct_per_type(model: SliceTCA, components: Sequence[Sequence[torch.Tensor]]):
+    """
+    :param model: SliceTCA model.
+    :param components: The components to construct.
+    :return: Reconstructed tensor.
+    """
 
     temp = [torch.zeros(model.dimensions).to(model.device) for i in range(len(components))]
 
@@ -30,10 +43,10 @@ def construct_per_type(model, components):
     return temp
 
 
-def construct_single_component(model, components, type, k):
+def construct_single_component(model: SliceTCA, components: Sequence[Sequence[torch.Tensor]], partition: int, k: int):
 
-    temp2 = [model.positive_function[type][q](components[type][q][k]) for q in range(len(components[type]))]
-    outer = torch.einsum(model.einsums[type], temp2)
-    outer = outer.permute(model.inverse_permutations[type])
+    temp2 = [model.positive_function[partition][q](components[partition][q][k]) for q in range(len(components[partition]))]
+    outer = torch.einsum(model.einsums[partition], temp2)
+    outer = outer.permute(model.inverse_permutations[partition])
 
     return outer

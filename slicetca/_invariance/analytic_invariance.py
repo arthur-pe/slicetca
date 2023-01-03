@@ -9,7 +9,7 @@ def svd_basis(model):
     new_components = [[None, None] for i in range(len(ranks))]
     for i in range(len(ranks)):
         if ranks[i] != 0:
-            constructed = model.construct_single_type(i)
+            constructed = model.construct_single_partition(i)
             flattened_constructed = constructed.permute([i]+[q for q in range(len(ranks)) if q != i])
             flattened_constructed = flattened_constructed.reshape(model.dimensions[i],-1).transpose(0,1)
 

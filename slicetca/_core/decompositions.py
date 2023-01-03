@@ -2,11 +2,34 @@ import torch
 from torch import nn
 import numpy as np
 
+from typing import Sequence, Union, Callable
 
 class PartitionTCA(nn.Module):
 
-    def __init__(self, dimensions, partitions, ranks, positive=False, initialization='uniform',
-                 init_weight=1.0, init_bias=0.0, device='cpu'):
+    def __init__(self,
+                 dimensions: Sequence[int],
+                 partitions: Sequence[Sequence[Sequence[int]]],
+                 ranks: Sequence[int],
+                 positive: Union[bool, Sequence[Sequence[Callable]]] = False,
+                 initialization: str = 'uniform',
+                 init_weight: float = 1.0,
+                 init_bias: float = 0.0,
+                 device: str = 'cpu'):
+        """
+        Parent class for the sliceTCA and TCA decompositions.
+
+        :param dimensions: Dimensions of the data to decompose.
+        :param partitions: List of partitions of the legs of the tensor.
+                        [[[0],[1]]] would be a matrix rank decomposition.
+        :param ranks: Number of components of each partition.
+        :param positive: If False does nothing.
+                         If True constrains all components to be positive.
+                         If list of list, the list of functions to apply to a given partition and component.
+        :param initialization: Components initialization 'uniform'~U(-1,1), 'uniform-positive'~U(0,1), 'normal'~N(0,1).
+        :param init_weight: Coefficient to multiply the initial component by.
+        :param init_bias: Coefficient to add to the initial component.
+        :param device: Torch device.
+        """
 
         super(PartitionTCA, self).__init__()
 
@@ -83,22 +106,40 @@ class PartitionTCA(nn.Module):
                     lhs += ','
             self.einsums.append(lhs + '->' + rhs)
 
-    def construct_single_component(self, type, k):
+    def construct_single_component(self, partition: int, k: int):
+        """
+        Constructs the kth term of the given partition.
 
-        temp = [self.positive_function[type][q](self.vectors[type][q][k]) for q in range(len(self.components[type]))]
-        outer = torch.einsum(self.einsums[type], temp)
-        outer = outer.permute(self.inverse_permutations[type])
+        :param partition: Type of the partition
+        :param k: Number of the component
+        :return: Tensor of shape self.dimensions
+        """
+
+        temp = [self.positive_function[partition][q](self.vectors[partition][q][k]) for q in range(len(self.components[partition]))]
+        outer = torch.einsum(self.einsums[partition], temp)
+        outer = outer.permute(self.inverse_permutations[partition])
 
         return outer
 
-    def construct_single_type(self, type):
+    def construct_single_partition(self, partition: int):
+        """
+        Constructs the sum of the terms of a given type of partition.
+
+        :param partition: Type of the partition
+        :return: Tensor of shape self.dimensions
+        """
+
         temp = torch.zeros(self.dimensions).to(self.device)
-        for j in range(self.ranks[type]):
-            temp += self.construct_single_component(type, j)
+        for j in range(self.ranks[partition]):
+            temp += self.construct_single_component(partition, j)
 
         return temp
 
     def construct(self):
+        """
+        Constructs the full tensor.
+        :return: Tensor of shape self.dimensions
+        """
 
         temp = torch.zeros(self.dimensions).to(self.device)
 
@@ -108,13 +149,14 @@ class PartitionTCA(nn.Module):
 
         return temp
 
-    def loss(self, a, b):
-        return self.mse(a, b)
-
-    def mse(self, a, b):
-        return ((a-b)**2).mean()
-
     def get_components(self, detach=False, numpy=False):
+        """
+        Returns the components of the model.
+        
+        :param detach: Whether to detach the gradient.
+        :param numpy: Whether to cast them to numpy arrays.
+        :return: list of list of tensors.
+        """
 
         temp = [[] for i in range(len(self.vectors))]
 
@@ -128,7 +170,14 @@ class PartitionTCA(nn.Module):
 
         return temp
 
-    def set_components(self, components):  # bug if positive_function != abs
+    def set_components(self, components: Sequence[Sequence[torch.Tensor]]):  # bug if positive_function != abs
+        """
+        Set the model's components. 
+        If the positive functions are abs or the identity model.set_components(model.get_components) 
+        has no effect besides resetting the gradient.
+        
+        :param components: list of list tensors.
+        """
 
         for i in range(len(self.vectors)):
             for j in range(len(self.vectors[i])):
@@ -139,12 +188,27 @@ class PartitionTCA(nn.Module):
                         self.vectors[i][j].copy_(torch.tensor(components[i][j], device=self.device))
         self.zero_grad()
 
-    def init_train(self, max_iter=1000, min_delta=0.0001, steps_delta=10):
-        self.max_iter = max_iter
-        self.min_delta = min_delta
-        self.steps_delta = steps_delta
-
-    def fit(self, X, optimizer, batch_prop=0.2, max_iter=10000, min_std=10**-3, iter_std=100, mask=None, verbose=True):
+    def fit(self, 
+            X: torch.Tensor, 
+            optimizer: torch.optim.Optimizer, 
+            batch_prop: float = 0.2, 
+            max_iter: int = 10000, 
+            min_std: float = 10**-3, 
+            iter_std: int = 100, 
+            mask: torch.Tensor = None, 
+            verbose: bool = True):
+        """
+        Fits the model to data.
+        
+        :param X: The data tensor.
+        :param optimizer: A torch optimizer.
+        :param batch_prop: Proportion of entries used to compute the gradient at every training iteration.
+        :param max_iter: Maximum training iterations.
+        :param min_std: Minimum std of the loss under which to return.
+        :param iter_std: Number of iterations over which this std is computed.
+        :param mask: Entries which are not used to compute the gradient at any training iteration.
+        :param verbose: Whether to print the loss at every step. 
+        """
 
         losses = []
 
@@ -178,8 +242,27 @@ class PartitionTCA(nn.Module):
 
 
 class SliceTCA(PartitionTCA):
-    def __init__(self, dimensions, ranks, positive=False, initialization='uniform',
-                 init_weight=1.0, init_bias=0.0, device='cpu'):
+    def __init__(self, 
+                 dimensions: Sequence[int], 
+                 ranks: Sequence[int], 
+                 positive: bool = False, 
+                 initialization: str = 'uniform',
+                 init_weight: float = 1.0, 
+                 init_bias: float = 0.0, 
+                 device: str = 'cpu'):
+        """
+        Main sliceTCA decomposition class.
+
+        :param dimensions: Dimensions of the data to decompose.
+        :param ranks: Number of components of each slice type.
+        :param positive: If False does nothing.
+                         If True constrains all components to be positive.
+                         If list of list, the list of functions to apply to a given partition and component.
+        :param initialization: Components initialization 'uniform'~U(-1,1), 'uniform-positive'~U(0,1), 'normal'~N(0,1).
+        :param init_weight: Coefficient to multiply the initial component by.
+        :param init_bias: Coefficient to add to the initial component.
+        :param device: Torch device.
+        """
 
         valence = len(dimensions)
         partitions = [[[i], [j for j in range(valence) if j != i]] for i in range(valence)]
@@ -189,8 +272,27 @@ class SliceTCA(PartitionTCA):
 
 
 class TCA(PartitionTCA):
-    def __init__(self, dimensions, rank, positive=False, initialization='uniform',
-                 init_weight=1.0, init_bias=0.0, device='cpu'):
+    def __init__(self,
+                 dimensions: Sequence[int],
+                 rank: Sequence[int],
+                 positive: bool = False,
+                 initialization: str = 'uniform',
+                 init_weight: float = 1.0,
+                 init_bias: float = 0.0,
+                 device: str = 'cpu'):
+        """
+        Main TCA decomposition class.
+
+        :param dimensions: Dimensions of the data to decompose.
+        :param rank: Number of components.
+        :param positive: If False does nothing.
+                         If True constrains all components to be positive.
+                         If list of list, the list of functions to apply to a given partition and component.
+        :param initialization: Components initialization 'uniform'~U(-1,1), 'uniform-positive'~U(0,1), 'normal'~N(0,1).
+        :param init_weight: Coefficient to multiply the initial component by.
+        :param init_bias: Coefficient to add to the initial component.
+        :param device: Torch device.
+        """
 
         if type(rank) is not tuple:
             rank = (rank,)

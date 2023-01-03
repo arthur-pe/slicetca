@@ -7,6 +7,9 @@ import numpy as np
 
 
 class TransformationBetween(nn.Module):
+    """
+    Transformation between sliceTCA component types.
+    """
 
     def __init__(self, model):
         super(TransformationBetween, self).__init__()
@@ -74,6 +77,10 @@ class TransformationBetween(nn.Module):
 
 
 class TransformationWithin(nn.Module):
+    """
+    Transformation within sliceTCA component types.
+    """
+
     def __init__(self, model):
         super().__init__()
 

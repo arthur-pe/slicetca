@@ -3,10 +3,17 @@ from .criteria import *
 
 import torch
 import copy
+from typing import Callable
 
 
-def invariance(model, objective_function=l2, transformation=None,
-           learning_rate=10**-2, max_iter=10000, min_std=10**-3, iter_std=100, verbose=False):
+def invariance(model : list[list[torch.Tensor]],
+               objective_function: Callable = l2,
+               transformation=None,
+               learning_rate=10**-2,
+               max_iter=10000,
+               min_std=10**-3,
+               iter_std=100,
+               verbose=False):
 
     if transformation is None: transformation = TransformationBetween(model)
 
