@@ -25,10 +25,10 @@ from slicetca import *
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-#your_data is a numpy array of shape (trials,neuron,time)
+#your_data is a numpy array of shape (trials,neuron,time).
 data = torch.tensor(your_data, device=device)
 
-#We decompose the tensor into 2 trial-, 0 neuron- and 3 time-slicing components.
+#The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
 components, _ = decompose(data, (2,0,3))
 ```
 
