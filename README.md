@@ -42,4 +42,4 @@ The full documentation can be found [here]().
 
 ## Reference
 
-A. Pellegrino<sup>†</sup><sub>✉</sub>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>✉</sub>, 2023, Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. Biorxiv:.
+A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>, 2023, Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. Biorxiv:.
