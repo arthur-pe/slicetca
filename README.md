@@ -18,8 +18,6 @@ pip install slicetca
 
 The full documentation can be found [here]().
 
----
-
 ## Examples
 
 ### Quick example 
@@ -40,8 +38,6 @@ components, _ = decompose(data, (2,0,3))
 ### Notebook
 
 See the [example notebook]() for an application of the method to publicly available data.
-
----
 
 ## Reference
 
