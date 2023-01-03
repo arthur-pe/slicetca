@@ -1,6 +1,8 @@
-import torch
 from .transformations import *
 from .criteria import *
+
+import torch
+import copy
 
 
 def invariance(model, objective_function=l2, transformation=None,

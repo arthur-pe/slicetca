@@ -41,7 +41,7 @@ plot(components)
 
 ### Notebook
 
-See the [example notebook]() for an application of the method to publicly available data.
+See the [example notebook]() for an application of the method to publicly available neural data.
 
 ## Reference
 

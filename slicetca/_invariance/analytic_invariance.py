@@ -1,5 +1,6 @@
 import torch
 
+
 def svd_basis(model):
 
     device = model.device
@@ -26,6 +27,7 @@ def svd_basis(model):
             new_components[i][1] = torch.zeros_like(model.vectors[i][1])
 
     return new_components
+
 
 if __name__=='__main__':
 

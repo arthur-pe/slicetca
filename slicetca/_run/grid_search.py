@@ -1,3 +1,5 @@
+from slicetca._run.decompose import decompose
+
 from multiprocessing import Pool
 import multiprocessing as mp
 from functools import partial
@@ -5,7 +7,6 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 import torch
 import numpy as np
 
-from slicetca._run.decompose import decompose
 
 def decompose_mp_sample(number_components_seed, data, mask, sample_size, threads_sample, **kwargs):
 

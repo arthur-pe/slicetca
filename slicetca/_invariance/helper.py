@@ -1,5 +1,6 @@
 import torch
 
+
 def mm(a, b):
     temp1 = [chr(105+i) for i in range(len(a.size()))]
     temp2 = [chr(105+len(a.size())-1+i) for i in range(len(b.size()))]
@@ -9,6 +10,7 @@ def mm(a, b):
     formula = indexes1+','+indexes2+'->'+rhs
     return torch.einsum(formula,[a,b])
 
+
 def batch_outer(a, b):
     temp1 = [chr(105 + i + 1) for i in range(len(a.size()) - 1)]
     temp2 = [chr(105 + len(a.size()) + i + 1) for i in range(len(b.size()) - 1)]
@@ -16,6 +18,7 @@ def batch_outer(a, b):
     indexes2 = ''.join(temp2)
     formula = chr(105) + indexes1 + ',' + chr(105) + indexes2 + '->' + chr(105) + indexes1 + indexes2
     return torch.einsum(formula, [a, b])
+
 
 def construct_per_type(model, components):
 
@@ -25,6 +28,7 @@ def construct_per_type(model, components):
         for j in range(model.ranks[i]):
             temp[i] += construct_single_component(model, components, i, j)
     return temp
+
 
 def construct_single_component(model, components, type, k):
 

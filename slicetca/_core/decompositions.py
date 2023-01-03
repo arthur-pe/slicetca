@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 
+
 class PartitionTCA(nn.Module):
 
     def __init__(self, dimensions, partitions, ranks, positive=False, initialization='uniform',
@@ -175,6 +176,7 @@ class PartitionTCA(nn.Module):
 
         self.losses += losses
 
+
 class SliceTCA(PartitionTCA):
     def __init__(self, dimensions, ranks, positive=False, initialization='uniform',
                  init_weight=1.0, init_bias=0.0, device='cpu'):
@@ -184,6 +186,7 @@ class SliceTCA(PartitionTCA):
 
         super().__init__(dimensions=dimensions, ranks=ranks, partitions=partitions, positive=positive,
                          initialization=initialization, init_weight=init_weight, init_bias=init_bias, device=device)
+
 
 class TCA(PartitionTCA):
     def __init__(self, dimensions, rank, positive=False, initialization='uniform',
@@ -197,6 +200,7 @@ class TCA(PartitionTCA):
 
         super().__init__(dimensions=dimensions, ranks=rank, partitions=partitions, positive=positive,
                          initialization=initialization, init_weight=init_weight, init_bias=init_bias, device=device)
+
 
 if __name__=='__main__':
 

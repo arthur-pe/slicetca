@@ -1,5 +1,7 @@
-import torch
 from slicetca._core.decompositions import SliceTCA, TCA
+
+import torch
+
 
 def decompose(data, number_components,
               positive=False,

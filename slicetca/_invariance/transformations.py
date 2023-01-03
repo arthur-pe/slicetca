@@ -1,9 +1,10 @@
+from .helper import *
+
 from itertools import combinations
 import torch
 import torch.nn as nn
 import numpy as np
 
-from .helper import *
 
 class TransformationBetween(nn.Module):
 
@@ -21,7 +22,6 @@ class TransformationBetween(nn.Module):
              range(self.number_components)])
 
         self.components = model.get_components()
-        #self.model = copy.deepcopy(model)
 
         self.remaining_index_combinations = [[None for j in range(self.number_components)] for i in
                                              range(self.number_components)]
@@ -92,4 +92,3 @@ class TransformationWithin(nn.Module):
                 components[i][1] = mm(torch.linalg.inv(self.free_gl[i]), components[i][1])
 
         return components
-
