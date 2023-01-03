@@ -1,4 +1,4 @@
-from slicetca._core.decompositions import SliceTCA, TCA
+from slicetca._core import SliceTCA, TCA
 
 import torch
 
