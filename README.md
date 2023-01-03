@@ -5,7 +5,7 @@ This library provides the tools to perform [SliceTCA]().
 ___
 
 <p align="center">
-  <img src="./img/decomposition.svg">
+  <img width="600" src="./img/decomposition.svg">
 </p>
 
 ## Installation 
