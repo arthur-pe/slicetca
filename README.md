@@ -1,3 +1,5 @@
 # SliceTCA
 
-![Alt text](./img/decomposition.svg)
+<p align="center">
+  <img src="./img/decomposition.svg">
+</p>
