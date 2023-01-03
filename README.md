@@ -24,7 +24,7 @@ The full documentation can be found [here]().
 
 ```python
 import torch
-from slicetca import *
+from slicetca import decompose
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
