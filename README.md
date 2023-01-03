@@ -24,7 +24,7 @@ The full documentation can be found [here]().
 
 ```python
 import torch
-from slicetca import decompose
+from slicetca import decompose, plot
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -33,6 +33,8 @@ data = torch.tensor(your_data, device=device)
 
 #The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
 components, _ = decompose(data, (2,0,3))
+
+plot(components)
 ```
 
 ### Notebook
