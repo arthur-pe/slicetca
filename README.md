@@ -36,7 +36,7 @@ components, _ = decompose(data, (2,0,3))
 
 See the [example notebook]() for an application of the method to publicly available data.
 
-### Full documentation
+## Full documentation
 
 The full documentation can be found [here]().
 
