@@ -1,6 +1,6 @@
 # SliceTCA
 
-This library provides tools to perform [SliceTCA]().
+This library provides tools to perform [sliceTCA]().
 
 ___
 
