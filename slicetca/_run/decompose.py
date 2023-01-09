@@ -15,7 +15,8 @@ def decompose(data: Union[torch.Tensor, np.array],
               min_std: float = 10**-3,
               iter_std: int = 100,
               mask: torch.Tensor = None,
-              verbose: bool = True,
+              verbose: bool = False,
+              progress_bar: bool = True,
               seed: int = 7):
     """
     High-level function to decompose a data tensor into a SliceTCA or TCA decomposition.
@@ -31,6 +32,7 @@ def decompose(data: Union[torch.Tensor, np.array],
     :param iter_std: Number of iterations over which this std is computed.
     :param mask: Entries which are not used to compute the gradient at any training iteration.
     :param verbose: Whether to print the loss at every step.
+    :param progress_bar: Whether to have a tqdm progress bar.
     :param seed: Torch seed.
     :return:  components: A list (over component types) of lists (over factors) of rank x component_shape tensors.
     :return: model: A SliceTCA or TCA model. It can be used to access the losses over training and much more.
@@ -47,7 +49,7 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=10**-1)#
 
-    model.fit(data, optimizer, batch_prop, max_iter, min_std, iter_std, mask, verbose)
+    model.fit(data, optimizer, batch_prop, max_iter, min_std, iter_std, mask, verbose, progress_bar)
 
     return model.get_components(numpy=True), model
 

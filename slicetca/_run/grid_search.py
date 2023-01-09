@@ -7,11 +7,12 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 import torch
 import numpy as np
 
+from typing import Sequence
 
 def grid_search(data: torch.Tensor,
-                max_ranks: list[int],
+                max_ranks: Sequence[int],
                 mask: torch.Tensor = None,
-                min_ranks: list[int] = None,
+                min_ranks: Sequence[int] = None,
                 sample_size: int = 1,
                 processes_sample: int = 1,
                 processes_grid: int = 1,
@@ -87,7 +88,7 @@ def decompose_mp(number_components_seed, data, mask, *args, **kwargs):
     if (number_components == np.zeros_like(number_components)).all():
         data_hat = 0
     else:
-        _, model = decompose(data, number_components, verbose=False, *args, seed=seed, **kwargs)
+        _, model = decompose(data, number_components, verbose=False, progress_bar=False, *args, seed=seed, **kwargs)
         data_hat = model.construct()
 
     if mask is None: loss = torch.mean((data-data_hat)**2).item()

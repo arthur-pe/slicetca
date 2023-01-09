@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 import numpy as np
+import tqdm
 
 from typing import Sequence, Union, Callable
 
@@ -47,15 +48,14 @@ class PartitionTCA(nn.Module):
             dim = components[i]
 
             # k-tensors of the outer product
-            match initialization:
-                case 'normal':
-                    v = [nn.Parameter(positive_function[i][j](torch.randn([rank]+d, device=device))) for j, d in enumerate(dim)]
-                case 'uniform':
-                    v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
-                case 'uniform-positive':
-                    v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias + init_weight)) for j, d in enumerate(dim)]
-                case _:
-                    raise Exception('Undefined initialization, select one of : normal, uniform, uniform-positive')
+            if initialization == 'normal':
+                v = [nn.Parameter(positive_function[i][j](torch.randn([rank]+d, device=device))) for j, d in enumerate(dim)]
+            elif initialization == 'uniform':
+                v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
+            elif initialization == 'uniform-positive':
+                v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias + init_weight)) for j, d in enumerate(dim)]
+            else:
+                raise Exception('Undefined initialization, select one of : normal, uniform, uniform-positive')
 
             vectors.append(nn.ParameterList(v))
 
@@ -196,7 +196,8 @@ class PartitionTCA(nn.Module):
             min_std: float = 10**-3, 
             iter_std: int = 100, 
             mask: torch.Tensor = None, 
-            verbose: bool = True):
+            verbose: bool = False,
+            progress_bar: bool = True):
         """
         Fits the model to data.
         
@@ -207,12 +208,15 @@ class PartitionTCA(nn.Module):
         :param min_std: Minimum std of the loss under which to return.
         :param iter_std: Number of iterations over which this std is computed.
         :param mask: Entries which are not used to compute the gradient at any training iteration.
-        :param verbose: Whether to print the loss at every step. 
+        :param verbose: Whether to print the loss at every step.
+        :param progress_bar: Whether to have a tqdm progress bar.
         """
 
         losses = []
 
-        for iteration in range(max_iter):
+        iterator = tqdm.tqdm(range(max_iter)) if progress_bar else range(max_iter)
+
+        for iteration in iterator:
 
             X_hat = self.construct()
 
@@ -235,6 +239,7 @@ class PartitionTCA(nn.Module):
             losses.append(total_loss)
 
             if verbose: print('Iteration:', iteration, 'MSE loss:', total_loss)
+            if progress_bar: iterator.set_description("MSE loss: " + str(total_loss)[:10] + '')
 
             if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std: break
 

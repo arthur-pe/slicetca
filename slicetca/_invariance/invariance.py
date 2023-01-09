@@ -3,17 +3,19 @@ from .criteria import *
 
 import torch
 import copy
-from typing import Callable
+import tqdm
+from typing import Callable, Sequence
 
 
-def invariance(model : list[list[torch.Tensor]],
+def invariance(model : Sequence[Sequence[torch.Tensor]],
                objective_function: Callable = l2,
-               transformation=None,
-               learning_rate=10**-2,
-               max_iter=10000,
-               min_std=10**-3,
-               iter_std=100,
-               verbose=False):
+               transformation: object = None,
+               learning_rate: float = 10**-2,
+               max_iter: int = 10000,
+               min_std: float = 10**-3,
+               iter_std: int = 100,
+               verbose: bool = False,
+               progress_bar: bool = True):
 
     if transformation is None: transformation = TransformationBetween(model)
 
@@ -25,7 +27,9 @@ def invariance(model : list[list[torch.Tensor]],
 
     losses = []
 
-    for iteration in range(max_iter):
+    iterator = tqdm.tqdm(range(max_iter)) if progress_bar else range(max_iter)
+
+    for iteration in iterator:
 
         components_transformed = transformation(copy.deepcopy(components))
 
@@ -33,6 +37,7 @@ def invariance(model : list[list[torch.Tensor]],
         l = objective_function(components_transformed_constructed)
 
         if verbose: print('Iteration:', iteration, '\tloss:', l.item())
+        if progress_bar: iterator.set_description("Invariance loss: " + str(l.item())[:10] + '')
 
         optim.zero_grad()
         l.backward()
