@@ -241,7 +241,9 @@ class PartitionTCA(nn.Module):
             if verbose: print('Iteration:', iteration, 'MSE loss:', total_loss)
             if progress_bar: iterator.set_description("MSE loss: " + str(total_loss)[:10] + '')
 
-            if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std: break
+            if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std:
+                if progress_bar: iterator.set_description("The model converged. MSE loss: " + str(total_loss)[:10] + '')
+                break
 
         self.losses += losses
 

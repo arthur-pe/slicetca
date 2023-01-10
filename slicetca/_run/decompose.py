@@ -23,7 +23,7 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     :param data: Torch tensor.
     :param number_components: If list or tuple number of sliceTCA components, else number of TCA components.
-    :param positive: Whether to use a positive decomposition.
+    :param positive: Whether to use a positive decomposition. Defaults the initialization to 'uniform-positive'.
     :param initialization: Components initialization 'uniform'~U(-1,1), 'uniform-positive'~U(0,1), 'normal'~N(0,1).
     :param learning_rate: Learning rate of the optimizer.
     :param batch_prop: Proportion of entries used to compute the gradient at every training iteration.
@@ -40,6 +40,8 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     torch.manual_seed(seed)
 
+    if isinstance(data, np.ndarray): data = torch.tensor(data, device='cuda' if torch.cuda.is_available() else 'cpu')
+
     dimensions = list(data.shape)
 
     if isinstance(number_components, int): decomposition = TCA
@@ -47,7 +49,7 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     model = decomposition(dimensions, number_components, positive, initialization, device=data.device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=10**-1)#
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)#
 
     model.fit(data, optimizer, batch_prop, max_iter, min_std, iter_std, mask, verbose, progress_bar)
 
