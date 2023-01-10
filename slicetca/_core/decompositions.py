@@ -53,7 +53,7 @@ class PartitionTCA(nn.Module):
             elif initialization == 'uniform':
                 v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
             elif initialization == 'uniform-positive':
-                v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias + init_weight)) for j, d in enumerate(dim)]
+                v = [nn.Parameter(positive_function[i][j]((2*torch.rand([rank] + d, device=device)-1)*init_weight + init_bias)) for j, d in enumerate(dim)]
             else:
                 raise Exception('Undefined initialization, select one of : normal, uniform, uniform-positive')
 
@@ -229,20 +229,21 @@ class PartitionTCA(nn.Module):
             if batch_prop != 1.0:
                 dX = dX*(torch.rand(self.dimensions, device=self.device)<batch_prop)
                 loss = torch.mean(torch.square(dX))/batch_prop
+                print(loss)
             else:
                 loss = torch.mean(torch.square(dX))
 
+            optim.zero_grad()
             loss.backward()
-
             optimizer.step()
 
             losses.append(total_loss)
 
             if verbose: print('Iteration:', iteration, 'MSE loss:', total_loss)
-            if progress_bar: iterator.set_description("MSE loss: " + str(total_loss)[:10] + '')
+            if progress_bar: iterator.set_description("MSE loss: " + str(total_loss) + '')
 
             if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std:
-                if progress_bar: iterator.set_description("The model converged. MSE loss: " + str(total_loss)[:10] + '')
+                if progress_bar: iterator.set_description("The model converged. MSE loss: " + str(total_loss) + '')
                 break
 
         self.losses += losses
@@ -320,7 +321,8 @@ if __name__=='__main__':
     optim = torch.optim.AdamW(p.parameters(), lr=10**-4, weight_decay=10**-3)
     #optim = torch.optim.SGD(p.parameters(), lr=10**-5)
     #optim = torch.optim.Adam(p.parameters(), lr=10**-4)
-    p.fit(t, optimizer=optim, min_std=10**-6, batch_prop=0.1, max_iter=5*10**4)
+
+    p.fit(t, optimizer=optim, min_std=10**-6, batch_prop=0.1, max_iter=5*10**4, progress_bar=False)
 
     print(torch.mean(torch.square(t-p.construct())))
 

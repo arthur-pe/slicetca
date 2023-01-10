@@ -17,7 +17,9 @@ def decompose(data: Union[torch.Tensor, np.array],
               mask: torch.Tensor = None,
               verbose: bool = False,
               progress_bar: bool = True,
-              seed: int = 7):
+              seed: int = 7,
+              weight_decay: float = 10**-1,
+              batch_prop_decay: int = 1):
     """
     High-level function to decompose a data tensor into a SliceTCA or TCA decomposition.
 
@@ -34,7 +36,9 @@ def decompose(data: Union[torch.Tensor, np.array],
     :param verbose: Whether to print the loss at every step.
     :param progress_bar: Whether to have a tqdm progress bar.
     :param seed: Torch seed.
-    :return:  components: A list (over component types) of lists (over factors) of rank x component_shape tensors.
+    :param weight_decay: Decay of the parameters. If None defaults to Adam, else AdamW.
+    :param batch_prop_decay: Exponential decay steps of the proportion of entries not used to compute the gradient.
+    :return: components: A list (over component types) of lists (over factors) of rank x component_shape tensors.
     :return: model: A SliceTCA or TCA model. It can be used to access the losses over training and much more.
     """
 
@@ -49,9 +53,11 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     model = decomposition(dimensions, number_components, positive, initialization, device=data.device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)#
+    if weight_decay is None: optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    else: optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    model.fit(data, optimizer, batch_prop, max_iter, min_std, iter_std, mask, verbose, progress_bar)
+    for i in range(1,batch_prop_decay+1):
+        model.fit(data, optimizer, 1-(1-batch_prop)**i, max_iter, min_std, iter_std, mask, verbose, progress_bar)
 
     return model.get_components(numpy=True), model
 
