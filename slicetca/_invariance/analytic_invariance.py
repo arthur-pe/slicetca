@@ -1,7 +1,7 @@
 import torch
 
 
-def svd_basis(model):
+def svd_basis(model, **kwargs):
 
     device = model.device
     ranks = model.ranks
@@ -26,7 +26,9 @@ def svd_basis(model):
             new_components[i][0] = torch.zeros_like(model.vectors[i][0])
             new_components[i][1] = torch.zeros_like(model.vectors[i][1])
 
-    return new_components
+    model.set_components(new_components)
+
+    return model
 
 
 if __name__=='__main__':

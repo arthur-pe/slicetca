@@ -229,21 +229,20 @@ class PartitionTCA(nn.Module):
             if batch_prop != 1.0:
                 dX = dX*(torch.rand(self.dimensions, device=self.device)<batch_prop)
                 loss = torch.mean(torch.square(dX))/batch_prop
-                print(loss)
             else:
                 loss = torch.mean(torch.square(dX))
 
-            optim.zero_grad()
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             losses.append(total_loss)
 
             if verbose: print('Iteration:', iteration, 'MSE loss:', total_loss)
-            if progress_bar: iterator.set_description("MSE loss: " + str(total_loss) + '')
+            if progress_bar: iterator.set_description('MSE loss: ' + str(total_loss) + ' ')
 
             if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std:
-                if progress_bar: iterator.set_description("The model converged. MSE loss: " + str(total_loss) + '')
+                if progress_bar: iterator.set_description('The model converged. MSE loss: ' + str(total_loss) + ' ')
                 break
 
         self.losses += losses

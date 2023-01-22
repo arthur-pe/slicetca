@@ -1,66 +1,27 @@
-from .transformations import *
+from .iterative_invariance import sgd_invariance
+from .analytic_invariance import svd_basis
 from .criteria import *
+from .._core.decompositions import SliceTCA
 
-import torch
-import copy
-import tqdm
-from typing import Callable, Sequence
+dict_L2_invariance_objectives = {'regularization': l2}
+dict_L3_invariance_functions = {'svd': svd_basis}
 
+def invariance(model: SliceTCA,
+               L2: str = 'regularization',
+               L3: str = 'svd',
+               **kwargs):
+    """
+    High level function for invariance optimization.
+    Note: modifies inplace, deepcopy your model if you want a copy of the not invariance-optimized components.
 
-def invariance(model : Sequence[Sequence[torch.Tensor]],
-               objective_function: Callable = l2,
-               transformation: object = None,
-               learning_rate: float = 10**-2,
-               max_iter: int = 10000,
-               min_std: float = 10**-3,
-               iter_std: int = 100,
-               verbose: bool = False,
-               progress_bar: bool = True):
+    :param model: A sliceTCA model.
+    :param L2: String, currently only supports 'regularization', you may add additional objectives.
+    :param L3: String, currently only supports 'svd'.
+    :param kwargs: Key-word arguments to be passed to L2 and L3 optimization functions. See iterative_function.py
+    :return: model with modified components.
+    """
 
-    if transformation is None: transformation = TransformationBetween(model)
+    model = sgd_invariance(model, objective_function=dict_L2_invariance_objectives[L2], **kwargs)
+    model = dict_L3_invariance_functions[L3](model, **kwargs)
 
-    model.requires_grad_(False)
-
-    optim = torch.optim.Adam(transformation.parameters(), lr=learning_rate)
-
-    components = model.get_components(detach=True)
-
-    losses = []
-
-    iterator = tqdm.tqdm(range(max_iter)) if progress_bar else range(max_iter)
-
-    for iteration in iterator:
-
-        components_transformed = transformation(copy.deepcopy(components))
-
-        components_transformed_constructed = construct_per_type(model, components_transformed)
-        l = objective_function(components_transformed_constructed)
-
-        if verbose: print('Iteration:', iteration, '\tloss:', l.item())
-        if progress_bar: iterator.set_description("Invariance loss: " + str(l.item())[:10] + '')
-
-        optim.zero_grad()
-        l.backward()
-        optim.step()
-
-        losses.append(l.item())
-
-        if len(losses)>iter_std and np.array(losses[-100:]).std()<min_std: break
-
-    return transformation(components)
-
-
-if __name__=='__main__':
-
-    from slicetca._core.decompositions import SliceTCA
-    m = SliceTCA((100,200,80),(3,2,4), initialization='uniform', device='cuda')
-
-    a = m.construct().detach()
-
-    transfo = nn.Sequential(TransformationBetween(m), TransformationWithin(m))
-    #transfo = TransformationWithin(m)
-
-    c = invariance(m, l2, transformation=transfo, verbose=True, max_iter=1000, learning_rate=0.01)
-    m.set_components(c)
-    b = m.construct()
-    print(torch.mean(torch.square(a-b)))
+    return model

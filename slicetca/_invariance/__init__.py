@@ -1,4 +1,3 @@
-from .invariance import *
-from .analytic_invariance import *
+from .invariance import invariance
 
-__all__ = ['svd_basis', 'invariance']
+__all__ = ['invariance']
