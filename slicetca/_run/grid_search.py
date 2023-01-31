@@ -11,7 +11,8 @@ from typing import Sequence
 
 def grid_search(data: torch.Tensor,
                 max_ranks: Sequence[int],
-                mask: torch.Tensor = None,
+                mask_train: torch.Tensor = None,
+                mask_test: torch.Tensor = None,
                 min_ranks: Sequence[int] = None,
                 sample_size: int = 1,
                 processes_sample: int = 1,
@@ -23,7 +24,8 @@ def grid_search(data: torch.Tensor,
 
     :param data: Data tensor to decompose.
     :param max_ranks: Maximum number of components of each type.
-    :param mask: Mask representing over which entries to compute the loss of the gridsearch. None is full tensor.
+    :param mask_train: Mask representing over which entries to compute the backpropagated loss. None is full tensor.
+    :param mask_test: Mask representing over which entries to compute the loss for validation. None is full tensor.
     :param min_ranks: Minimum number of components of each type.
     :param sample_size: Number of seeds to use for a given number of components.
     :param processes_sample: Number of processes (threads) to use for a given number of components across seeds.
@@ -47,7 +49,8 @@ def grid_search(data: torch.Tensor,
     print('Grid size:', str(rank_span), '- sample:', sample_size,
           '- total_fit:', torch.tensor(grid).size()[0]*sample_size)
 
-    dec = partial(decompose_mp_sample, data=data, mask=mask, sample_size=sample_size, processes_sample=processes_sample, **kwargs)
+    dec = partial(decompose_mp_sample, data=data, mask_train=mask_train, mask_test=mask_test, sample_size=sample_size,
+                  processes_sample=processes_sample, **kwargs)
 
     with Pool(max_workers=processes_grid) as pool: out_grid = np.array(list(pool.map(dec, grid)), dtype=np.float32)
 
@@ -60,7 +63,7 @@ def grid_search(data: torch.Tensor,
     return loss_grid, seed_grid
 
 
-def decompose_mp_sample(number_components_seed, data, mask, sample_size, processes_sample, **kwargs):
+def decompose_mp_sample(number_components_seed, data, mask_train, mask_test, sample_size, processes_sample, **kwargs):
 
     number_components = number_components_seed[:-1]
     seed = number_components_seed[-1]
@@ -69,7 +72,11 @@ def decompose_mp_sample(number_components_seed, data, mask, sample_size, process
 
     print('Starting fitting components:', number_components)
 
-    dec = partial(decompose_mp, data=data.clone(), mask=mask, **kwargs)
+    dec = partial(decompose_mp,
+                  data=data.clone(),
+                  mask_train=(mask_train.clone().float() if mask_train is not None else None),
+                  mask_test=(mask_test.clone().float() if mask_test is not None else None),
+                  **kwargs)
 
     sample = number_components[np.newaxis].repeat(sample_size, 0)
     seeds = np.random.randint(10**2,10**6, sample_size)
@@ -81,18 +88,19 @@ def decompose_mp_sample(number_components_seed, data, mask, sample_size, process
     return loss, seeds
 
 
-def decompose_mp(number_components_seed, data, mask, *args, **kwargs):
+def decompose_mp(number_components_seed, data, mask_train, mask_test, *args, **kwargs):
 
     number_components, seed = number_components_seed[:-1], number_components_seed[-1]
 
     if (number_components == np.zeros_like(number_components)).all():
         data_hat = 0
     else:
-        _, model = decompose(data, number_components, verbose=False, progress_bar=False, *args, seed=seed, **kwargs)
+        _, model = decompose(data, number_components, mask=mask_train, verbose=False, progress_bar=False, *args,
+                             seed=seed, **kwargs)
         data_hat = model.construct()
 
-    if mask is None: loss = torch.mean((data-data_hat)**2).item()
-    else: loss = torch.mean(((data-data_hat)*(1-mask))**2).item()
+    if mask_test is None: loss = torch.mean((data-data_hat)**2).item()
+    else: loss = torch.mean(((data-data_hat)*(1-mask_test))**2).item()
 
     return loss
 
@@ -112,8 +120,12 @@ if __name__=='__main__':
 
     torch.manual_seed(8)
 
-    dim = (25,15,20)
+    dim = (5,10,3)
 
     data = SliceTCA(dim, [1,2,3], device='cuda').construct().detach()
 
-    components, model = grid_search(data, [2,0,3], learning_rate=10**-3, max_iter=10, sample_size=2)
+    mask_train = torch.rand_like(data)<0.5
+    mask_test = mask_train & (torch.rand_like(data)<0.5)
+
+    components, model = grid_search(data, [2,0,3], learning_rate=10**-3, max_iter=10, sample_size=2, processes_sample=1,
+                                    processes_grid=1, mask_train=None, mask_test=None)
