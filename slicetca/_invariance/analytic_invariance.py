@@ -2,6 +2,13 @@ import torch
 
 
 def svd_basis(model, **kwargs):
+    """
+    Sets the vectors of each slice type to an orthonormal basis.
+
+    :param model: SliceTCA model
+    :param kwargs: ignored
+    :return: model with new components.
+    """
 
     device = model.device
     ranks = model.ranks
@@ -29,15 +36,3 @@ def svd_basis(model, **kwargs):
     model.set_components(new_components)
 
     return model
-
-
-if __name__=='__main__':
-
-    from slicetca._core.decompositions import SliceTCA
-    m = SliceTCA((10,4,8,5),(3,2,4,1), initialization='uniform', device='cuda')
-
-    a = m.construct().detach()
-    c = svd_basis(m)
-    m.set_components(c)
-    b = m.construct()
-    print(torch.mean(torch.square(a-b)))

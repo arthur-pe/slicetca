@@ -18,6 +18,23 @@ def sgd_invariance(model: SliceTCA,
                    verbose: bool = False,
                    progress_bar: bool = True,
                    **kwargs):
+    """
+    Enables optimizing the components w.r.t. some objective function while fixing the overall reconstructed tensor.
+
+    :param model: SliceTCA model.
+    :param objective_function: The objective to optimize.
+    :param transformation:  transformations.TransformationBetween(model) or
+                            transformations.TransformationWithin(model) or
+                            nn.Sequential(TransformationWithin(model), TransformationBetween(model))
+    :param learning_rate: Learning rate for the optimizer (default Adam).
+    :param max_iter: Maximum number of iterations.
+    :param min_std: Minimum std of the last iter_std iterations under which to assume the model has converged.
+    :param iter_std: See min_std.
+    :param verbose: Whether to print the loss.
+    :param progress_bar: Whether to have a progress bar.
+    :param kwargs: ignored.
+    :return: model with the modified components.
+    """
 
     if transformation is None: transformation = TransformationBetween(model)
 
@@ -54,19 +71,3 @@ def sgd_invariance(model: SliceTCA,
     model.set_components(transformation(components))
 
     return model
-
-
-if __name__=='__main__':
-
-    from slicetca._core.decompositions import SliceTCA
-    m = SliceTCA((100,200,80),(3,2,4), initialization='uniform', device='cuda')
-
-    a = m.construct().detach()
-
-    transfo = nn.Sequential(TransformationBetween(m), TransformationWithin(m))
-    #transfo = TransformationWithin(m)
-
-    c = sgd_invariance(m, l2, transformation=transfo, verbose=True, max_iter=1000, learning_rate=0.01)
-    m.set_components(c)
-    b = m.construct()
-    print(torch.mean(torch.square(a-b)))

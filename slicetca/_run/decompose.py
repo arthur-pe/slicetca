@@ -61,16 +61,3 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     return model.get_components(numpy=True), model
 
-if __name__=='__main__':
-
-    torch.manual_seed(8)
-
-    dim = (250,150,200)
-
-    data = SliceTCA(dim, [1,2,3], device='cuda').construct().detach()
-
-    components, model = decompose(data, [0,0,1], learning_rate=10**-3, max_iter=10)
-
-    components, model = decompose(data, [1,2,3], learning_rate=10**-3, max_iter=10)
-
-    components, model = decompose(data, [1,2,3], learning_rate=10**-3, max_iter=10)

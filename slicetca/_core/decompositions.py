@@ -309,21 +309,3 @@ class TCA(PartitionTCA):
 
         super().__init__(dimensions=dimensions, ranks=rank, partitions=partitions, positive=positive,
                          initialization=initialization, init_weight=init_weight, init_bias=init_bias, device=device)
-
-
-if __name__=='__main__':
-
-    t = PartitionTCA([11,12,13], [[[0],[1,2]], [[2,0], [1]]], [1,2]).construct().detach()
-    t = torch.ones([11,12,13])+torch.randn([11,12,13])/2
-    p = PartitionTCA([11,12,13], [[[0],[1,2]], [[2,0], [1]]], [1,0])
-
-    optim = torch.optim.AdamW(p.parameters(), lr=10**-4, weight_decay=10**-3)
-    #optim = torch.optim.SGD(p.parameters(), lr=10**-5)
-    #optim = torch.optim.Adam(p.parameters(), lr=10**-4)
-
-    p.fit(t, optimizer=optim, min_std=10**-6, batch_prop=0.1, max_iter=5*10**4, progress_bar=False)
-
-    print(torch.mean(torch.square(t-p.construct())))
-
-    print(p.vectors[0][0].std())
-    print(p.vectors[0][1].std())

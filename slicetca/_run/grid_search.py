@@ -7,9 +7,10 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 import torch
 import numpy as np
 
-from typing import Sequence
+from typing import Sequence, Union
 
-def grid_search(data: torch.Tensor,
+
+def grid_search(data: Union[torch.Tensor, np.array],
                 max_ranks: Sequence[int],
                 mask_train: torch.Tensor = None,
                 mask_test: torch.Tensor = None,
@@ -112,20 +113,3 @@ def get_grid_sample(min_dims, max_dims):
     grid = np.stack(grid)
 
     return grid.reshape(grid.shape[0], -1).T
-
-
-if __name__=='__main__':
-
-    from slicetca._core.decompositions import SliceTCA, TCA
-
-    torch.manual_seed(8)
-
-    dim = (5,10,3)
-
-    data = SliceTCA(dim, [1,2,3], device='cuda').construct().detach()
-
-    mask_train = torch.rand_like(data)<0.5
-    mask_test = mask_train & (torch.rand_like(data)<0.5)
-
-    components, model = grid_search(data, [2,0,3], learning_rate=10**-3, max_iter=10, sample_size=2, processes_sample=1,
-                                    processes_grid=1, mask_train=None, mask_test=None)

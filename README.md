@@ -16,7 +16,7 @@ pip install slicetca
 
 ## Full documentation
 
-The full documentation can be found [here]().
+The full documentation can be found [here](https://github.com/arthur-pe/slicetca/blob/master/documentation.md).
 
 ## Examples
 

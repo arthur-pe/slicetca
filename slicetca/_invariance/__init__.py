@@ -1,3 +1,3 @@
-from .invariance import invariance
+from slicetca._invariance.invariance import invariance
 
 __all__ = ['invariance']
