@@ -4,11 +4,11 @@ from typing import Iterable
 
 
 def block_mask(dimensions: Iterable[int],
-                   train_blocks_dimensions: Iterable[int],
-                   test_blocks_dimensions: Iterable[int],
-                   number_blocks:int,
-                   exact:bool = True,
-                   device:str = 'cpu'):
+                train_blocks_dimensions: Iterable[int],
+                test_blocks_dimensions: Iterable[int],
+                number_blocks:int,
+                exact:bool = True,
+                device:str = 'cpu'):
     """
     Builds train and test masks.
     The train mask has block of entries masked.
@@ -20,7 +20,7 @@ def block_mask(dimensions: Iterable[int],
     :param number_blocks: The number of blocks.
     :param exact:   If exact then the number of blocks will be number_blocks (slower).
                     If not exact, the number of blocks will be on average number_blocks (faster).
-    :param device: torch device (e.g. 'cuda' or 'cpu'). This function may run slower on cuda.
+    :param device: torch device (e.g. 'cuda' or 'cpu').
     :return: train_mask, test_mask
     """
 
@@ -37,10 +37,8 @@ def block_mask(dimensions: Iterable[int],
         start = start[torch.randperm(flattened_max_dim, device=device)]
         start = start.reshape(dimensions)
     else:
-        if device == 'cpu':
-            start = (torch.rand(tuple(dimensions))<number_blocks/flattened_max_dim).long()
-        elif device == 'cuda':
-            start = (torch.cuda.FloatTensor(tuple(dimensions)).uniform_() < number_blocks / flattened_max_dim).long()
+        density = number_blocks / flattened_max_dim
+        start = (torch.rand(tuple(dimensions), device=device) < density).long()
 
     start_index = start.nonzero()
     number_blocks = len(start_index)
@@ -67,7 +65,7 @@ def block_mask(dimensions: Iterable[int],
 
 if __name__=='__main__':
 
-    train_mask, test_mask = block_mask((50,30,40), (0,3,2), (0,2,1), 50, exact=True, device='cpu')
+    train_mask, test_mask = block_mask((50,30,40), (0,0,0), (0,0,0), 50, exact=True, device='cuda')
 
     print(train_mask.shape)
 
@@ -80,11 +78,11 @@ if __name__=='__main__':
     fig = plt.figure(figsize=(10,5))
 
     ax = fig.add_subplot(1,2,1)
-    ax.imshow(train_mask[d], cmap='RdBu_r', vmin=-1, vmax=1)
+    ax.imshow(train_mask[d].cpu(), cmap='RdBu_r', vmin=-1, vmax=1)
     ax.set_title('train mask')
 
     ax = fig.add_subplot(1,2,2)
-    ax.imshow(test_mask[d], cmap='RdBu_r', vmin=-1, vmax=1)
+    ax.imshow(test_mask[d].cpu(), cmap='RdBu_r', vmin=-1, vmax=1)
     ax.set_title('test mask')
 
     plt.show()
