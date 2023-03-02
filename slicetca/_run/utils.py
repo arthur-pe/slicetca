@@ -15,8 +15,8 @@ def block_mask(dimensions: Iterable[int],
     The test mask has the opposite entries masked, plus the boundaries of the blocks.
 
     :param dimensions: Dimensions of the mask.
-    :param train_blocks_dimensions: Dimensions of the blocks discarded for training.
-    :param test_blocks_dimensions: Dimensions of the blocks retained for testing.
+    :param train_blocks_dimensions: Dimensions of the blocks discarded for training will be 2*train_block_dimensions+1
+    :param test_blocks_dimensions: Dimensions of the blocks retained for testing will be 2*test_block_dimensions+1
     :param number_blocks: The number of blocks.
     :param exact:   If exact then the number of blocks will be number_blocks (slower).
                     If not exact, the number of blocks will be on average number_blocks (faster).
@@ -65,7 +65,7 @@ def block_mask(dimensions: Iterable[int],
 
 if __name__=='__main__':
 
-    train_mask, test_mask = block_mask((50,30,40), (0,0,0), (0,0,0), 50, exact=True, device='cuda')
+    train_mask, test_mask = block_mask((50,30,40), (3,2,3), (3,2,2), 50, exact=True, device='cuda')
 
     print(train_mask.shape)
 
