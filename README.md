@@ -1,6 +1,6 @@
 # SliceTCA
 
-This library provides tools to perform [sliceTCA]().
+This library provides tools to perform [sliceTCA](https://www.biorxiv.org/content/10.1101/2023.03.01.530616v1).
 
 ___
 
@@ -28,10 +28,10 @@ from slicetca import decompose, invariance, plot
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-#your_data is a numpy array of shape (trials,neuron,time).
+# your_data is a numpy array of shape (trials, neurons, time).
 data = torch.tensor(your_data, dtype=torch.float, device=device)
 
-#The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
+# The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
 components, _ = decompose(data, (2,0,3))
 
 components = invariance(components)
@@ -45,4 +45,4 @@ See the [example notebook]() for an application of sliceTCA to publicly availabl
 
 ## Reference
 
-A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>. (2023). Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. [Biorxiv:]().
+A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>. (2023). Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. [https://www.biorxiv.org/content/10.1101/2023.03.01.530616v1](https://www.biorxiv.org/content/10.1101/2023.03.01.530616v1).

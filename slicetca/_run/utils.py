@@ -62,27 +62,3 @@ def block_mask(dimensions: Iterable[int],
     for j in a: test_mask[j] = 1
 
     return train_mask, test_mask
-
-if __name__=='__main__':
-
-    train_mask, test_mask = block_mask((50,30,40), (3,2,3), (3,2,2), 50, exact=True, device='cuda')
-
-    print(train_mask.shape)
-
-    print(torch.sum(~train_mask))
-
-    from matplotlib import pyplot as plt
-
-    d = -1
-
-    fig = plt.figure(figsize=(10,5))
-
-    ax = fig.add_subplot(1,2,1)
-    ax.imshow(train_mask[d].cpu(), cmap='RdBu_r', vmin=-1, vmax=1)
-    ax.set_title('train mask')
-
-    ax = fig.add_subplot(1,2,2)
-    ax.imshow(test_mask[d].cpu(), cmap='RdBu_r', vmin=-1, vmax=1)
-    ax.set_title('test mask')
-
-    plt.show()
