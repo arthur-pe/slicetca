@@ -281,7 +281,7 @@ class SliceTCA(PartitionTCA):
 class TCA(PartitionTCA):
     def __init__(self,
                  dimensions: Sequence[int],
-                 rank: Sequence[int],
+                 rank: int,
                  positive: bool = False,
                  initialization: str = 'uniform',
                  init_weight: float = 1.0,
