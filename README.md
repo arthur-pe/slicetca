@@ -23,8 +23,9 @@ The full documentation can be found [here](https://github.com/arthur-pe/slicetca
 ### Quick example 
 
 ```python
+import slicetca
 import torch
-from slicetca import decompose, invariance, plot
+from matplotlib import pyplot as plt
 
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -32,11 +33,13 @@ device = ('cuda' if torch.cuda.is_available() else 'cpu')
 data = torch.tensor(your_data, dtype=torch.float, device=device)
 
 # The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
-components, _ = decompose(data, (2,0,3))
+components, model = slicetca.decompose(data, (2,0,3))
 
-components = invariance(components)
+model = slicetca.invariance(model)
 
-plot(components)
+slicetca.plot(model)
+
+plt.show()
 ```
 
 ### Notebook

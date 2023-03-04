@@ -1,4 +1,3 @@
-import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from typing import Sequence, Union
@@ -40,11 +39,14 @@ def plot(model,
     positive = model.positive
     ranks = model.ranks
 
-    number_nonzero_components = np.sum(np.array(ranks)!=0)
+    # Pad the variables in case fewer than needed variables are provided
+    variables = list(variables)+['variable '+str(i+1) for i in range(len(variables), max(len(variables), len(ranks)))]
+
+    number_nonzero_components = np.sum(np.array(ranks) != 0)
 
     axes = [[[None for k in j] for j in i] for i in components]
 
-    figure_size = max([sum([j.shape[0]*3 if len(j.shape)==3 else j.shape[0]*factor_height for j in i]) for i in components])
+    figure_size = max([sum([j.shape[0]*3 if len(j.shape) == 3 else j.shape[0]*factor_height for j in i]) for i in components])
 
     fig = plt.figure(figsize=(number_nonzero_components*3, figure_size), dpi=dpi)
     gs = fig.add_gridspec(figure_size, number_nonzero_components)
@@ -113,14 +115,17 @@ def plot(model,
 if __name__=='__main__':
 
     from slicetca._core.decompositions import SliceTCA, TCA, PartitionTCA
+    import matplotlib
 
     m = SliceTCA((10,15,20),(1,3,1), positive=True)
     #m = TCA((10,11,12), 3)
 
     trial_color = matplotlib.colormaps['hsv'](np.random.rand(10))
-    plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60)
+    axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60)
 
     #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
     #plot(m, variables=[str(i) for i in range(5)])
+
+    axes[1][0][1].axvline(5, color='grey', linestyle='--')
 
     plt.show()
