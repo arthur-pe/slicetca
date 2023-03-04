@@ -11,6 +11,7 @@ def plot(model,
          aspect: str = 'auto',
          s: int = 10,
          cmap: str = None,
+         tight_layout: bool = True,
          dpi: int = 60):
     """
     Plots SliceTCA components. Plotting TCA or PartitionTCA components also works but is not optimized.
@@ -25,6 +26,7 @@ def plot(model,
     :param aspect: 'auto' will give a square-looking slice, 'equal' will preserve the ratios.
     :param s: size of scatter dots (see colors parameter).
     :param cmap: matplotlib cmap for 2-tensor factors (slices). Defaults to inferno for positive else seismic.
+    :param tight_layout: To call plt.tight_layout(). Note that constrained_layout does not work well with
     :param dpi: Figure dpi. Set lower if you have many components of a given type.
     :return: A list of axes which can be used for further customizing the plots.
              The list has shape the same shape as model.get_components. That is component_type x (slice/factor) x rank
@@ -41,7 +43,7 @@ def plot(model,
 
     figure_size = max([sum([j.shape[0]*3 if len(j.shape)==3 else j.shape[0]*factor_height for j in i]) for i in components])
 
-    fig = plt.figure(figsize=(number_nonzero_components*3, figure_size), dpi=dpi, constrained_layout=True)
+    fig = plt.figure(figsize=(number_nonzero_components*3, figure_size), dpi=dpi)
     gs = fig.add_gridspec(figure_size, number_nonzero_components)
 
     column = 0
@@ -99,6 +101,8 @@ def plot(model,
 
         if ranks[i] != 0: column += 1
 
+    if tight_layout: fig.tight_layout()
+
     return axes
 
 
@@ -106,14 +110,12 @@ if __name__=='__main__':
 
     from slicetca._core.decompositions import SliceTCA, TCA, PartitionTCA
 
-    #m = SliceTCA((10,15,20),(1,5,1), positive=True)
+    m = SliceTCA((10,15,20),(1,3,1), positive=True)
     #m = TCA((10,11,12), 3)
 
-    #plot(m, aspect='auto', colors=(None, np.random.rand(15,3), None))
+    plot(m, aspect='auto', colors=(None, np.random.rand(15,3), None), dpi=60)
 
-    m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
-    plot(m, variables=[str(i) for i in range(5)])
+    #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
+    #plot(m, variables=[str(i) for i in range(5)])
 
-
-    plt.tight_layout()
     plt.show()
