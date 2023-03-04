@@ -1,3 +1,4 @@
+import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from typing import Sequence, Union
@@ -22,6 +23,8 @@ def plot(model,
     :param variables: The axes labels, in the same order as the dimensions of the tensor.
     :param colors: The colors of the variable (e.g. trial condition). Used only for 1-tensor factors.
                    None or 1-d variable will default to plt.plot, 2-d (trials x RGBA) to scatter.
+                   Note that to generate RGBA colors from integer trial condition you may call:
+                        colors = matplotlib.colormaps['hsv'](condition/np.max(condition))
     :param factor_height: Height of the 1-tensor factors. Their length is 3.
     :param aspect: 'auto' will give a square-looking slice, 'equal' will preserve the ratios.
     :param s: size of scatter dots (see colors parameter).
@@ -97,6 +100,7 @@ def plot(model,
                     ax.text(0.5, 0.5, '3$\geq$ tensor', va='center', ha='center', color='black')
                     ax.axis('off')
 
+                # =========== Store axes ===========
                 axes[i][k][j] = ax
 
         if ranks[i] != 0: column += 1
@@ -113,7 +117,8 @@ if __name__=='__main__':
     m = SliceTCA((10,15,20),(1,3,1), positive=True)
     #m = TCA((10,11,12), 3)
 
-    plot(m, aspect='auto', colors=(None, np.random.rand(15,3), None), dpi=60)
+    trial_color = matplotlib.colormaps['hsv'](np.random.rand(10))
+    plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60)
 
     #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
     #plot(m, variables=[str(i) for i in range(5)])
