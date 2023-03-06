@@ -132,27 +132,3 @@ def plot(model,
     if tight_layout: fig.tight_layout()
 
     return axes
-
-
-if __name__=='__main__':
-
-    from slicetca.core.decompositions import SliceTCA, TCA, PartitionTCA
-    import matplotlib
-
-    m = SliceTCA((10,15,20),(1,3,1), positive=False)
-    #m = TCA((10,11,12), 3)
-
-    print(np.random.randn(10,15)[np.random.permutation(10)].shape)
-
-    trial_color = matplotlib.colormaps['hsv'](np.random.rand(10))
-    axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60,
-                ticks=(np.arange(10), np.arange(15), None),
-                tick_labels=([chr(65+i) for i in range(10)], [chr(65+i) for i in range(15)], None),
-                sorting_indices=(np.random.permutation(10), np.random.permutation(15), None))
-
-    #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
-    #plot(m, variables=[str(i) for i in range(5)])
-
-    #axes[1][0][1].axvline(5, color='grey', linestyle='--')
-
-    plt.show()
