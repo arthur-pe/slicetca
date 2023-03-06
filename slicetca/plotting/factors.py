@@ -10,6 +10,7 @@ def plot(model,
          sorting_indices: Sequence[np.ndarray] = (None, None, None),
          ticks: Sequence[np.ndarray] = (None, None, None),
          tick_labels: Sequence[np.ndarray] = (None, None, None),
+         quantile: float = 0.95,
          factor_height: int = 2,
          aspect: str = 'auto',
          s: int = 10,
@@ -29,7 +30,8 @@ def plot(model,
                         colors = matplotlib.colormaps['hsv'](condition/np.max(condition))
     :param sorting_indices: Sort (e.g. trials) according to indices.
     :param ticks: Can be used instead of the 0,1, ... default indexing.
-    :param tick_labels: requires ticks
+    :param tick_labels: Requires ticks
+    :param quantile: Quantile of imshow cmap.
     :param factor_height: Height of the 1-tensor factors. Their length is 3.
     :param aspect: 'auto' will give a square-looking slice, 'equal' will preserve the ratios.
     :param s: size of scatter dots (see colors parameter).
@@ -72,7 +74,7 @@ def plot(model,
                     leg = partitions[i][k][0]
 
                     if sorting_indices[leg] is not None:
-                        current_component = current_component[sorting_indices]
+                        current_component = current_component[sorting_indices[leg]]
 
                     if isinstance(colors[leg], np.ndarray) and len(colors[leg].shape) == 2:
                         ax.scatter(np.arange(len(current_component)), current_component, color=colors[leg], s=s)
@@ -96,9 +98,11 @@ def plot(model,
                         current_component = current_component.T[sorting_indices[partitions[i][k][1]]].T
 
                     if p:
-                        ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'inferno'))
+                        ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'inferno'),
+                                  vmin=np.quantile(current_component,1-quantile),
+                                  vmax=np.quantile(current_component,quantile))
                     else:
-                        min_max = np.quantile(np.abs(current_component),0.95).item()
+                        min_max = np.quantile(np.abs(current_component),quantile)
                         ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'seismic'),
                                   vmin=-min_max, vmax=min_max)
 
@@ -135,7 +139,7 @@ if __name__=='__main__':
     from slicetca.core.decompositions import SliceTCA, TCA, PartitionTCA
     import matplotlib
 
-    m = SliceTCA((10,15,20),(1,3,1), positive=True)
+    m = SliceTCA((10,15,20),(1,3,1), positive=False)
     #m = TCA((10,11,12), 3)
 
     print(np.random.randn(10,15)[np.random.permutation(10)].shape)
@@ -144,7 +148,7 @@ if __name__=='__main__':
     axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60,
                 ticks=(np.arange(10), np.arange(15), None),
                 tick_labels=([chr(65+i) for i in range(10)], [chr(65+i) for i in range(15)], None),
-                sorting_indices=(np.random.permutation(10), None, None))
+                sorting_indices=(np.random.permutation(10), np.random.permutation(15), None))
 
     #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
     #plot(m, variables=[str(i) for i in range(5)])
