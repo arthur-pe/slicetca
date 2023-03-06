@@ -2,7 +2,7 @@ from .invariance import *
 from .plotting import *
 from .run import *
 
-__version__ = '0.1.4'
+__version__ = '0.1.6'
 __author__ = 'Arthur Pellegrino, Heike Stein'
 
 __all__ = ['invariance', 'decompose', 'grid_search', 'block_mask', 'plot']
