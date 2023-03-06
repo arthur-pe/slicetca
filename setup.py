@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='slicetca',
-    version='0.1.0',
+    version='0.1.1',
     description='Package to perform Slice Tensor Component Analysis',
     url='https://github.com/arthur-pe/slicetca',
     author='Arthur Pellegrino',
