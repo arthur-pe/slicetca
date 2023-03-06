@@ -1,4 +1,4 @@
-from ._invariance import *
+from slicetca.invariance import *
 from ._plotting import *
 from ._run import *
 

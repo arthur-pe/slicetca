@@ -1,6 +1,6 @@
-from slicetca._invariance.iterative_invariance import sgd_invariance
-from slicetca._invariance.analytic_invariance import svd_basis
-from slicetca._invariance.criteria import *
+from slicetca.invariance.iterative_invariance import sgd_invariance
+from slicetca.invariance.analytic_invariance import svd_basis
+from slicetca.invariance.criteria import *
 from slicetca._core.decompositions import SliceTCA
 
 dict_L2_invariance_objectives = {'regularization': l2}
