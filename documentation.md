@@ -22,5 +22,5 @@ For more specific use-cases, low-level functions might be preferred.
    * `.get_components(self, detach=False, numpy=False)` returns the model's components. To backpropagate through the tensor, set detach=False.
  * `_invariance` 
    * `.analytic_invariance.svd_basis(model)` sets the vectors of each slice type to an orthonormal basis and sort them by variance explained.
-   * `.sgd_invariance(model, objective_function, transformation, ...)` allows optimizing the components w.r.t. some objective function while fixing the overall tensor. 
+   * `.sgd_invariance(model, objective_function, transformation, ...)` allows optimizing the components w.r.t. some objective function while fixing the overall tensor.
  
