@@ -71,7 +71,8 @@ def plot(model,
 
                     leg = partitions[i][k][0]
 
-                    if sorting_indices[leg] != None: current_component = current_component[sorting_indices]
+                    if sorting_indices[leg] is not None:
+                        current_component = current_component[sorting_indices]
 
                     if isinstance(colors[leg], np.ndarray) and len(colors[leg].shape) == 2:
                         ax.scatter(np.arange(len(current_component)), current_component, color=colors[leg], s=s)
@@ -89,10 +90,10 @@ def plot(model,
 
                     p = (positive if isinstance(positive, bool) else positive[i][k])
 
-                    if sorting_indices[partitions[i][k][0]] != None:
-                        current_component = current_component[sorting_indices]
-                    if sorting_indices[partitions[i][k][1]] != None:
-                        current_component = current_component.T[sorting_indices].T
+                    if sorting_indices[partitions[i][k][0]] is not None:
+                        current_component = current_component[sorting_indices[partitions[i][k][0]]]
+                    if sorting_indices[partitions[i][k][1]] is not None:
+                        current_component = current_component.T[sorting_indices[partitions[i][k][1]]].T
 
                     if p:
                         ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'inferno'))
@@ -137,10 +138,13 @@ if __name__=='__main__':
     m = SliceTCA((10,15,20),(1,3,1), positive=True)
     #m = TCA((10,11,12), 3)
 
+    print(np.random.randn(10,15)[np.random.permutation(10)].shape)
+
     trial_color = matplotlib.colormaps['hsv'](np.random.rand(10))
     axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60,
                 ticks=(np.arange(10), np.arange(15), None),
-                tick_labels=([chr(65+i) for i in range(10)], [chr(65+i) for i in range(15)], None))
+                tick_labels=([chr(65+i) for i in range(10)], [chr(65+i) for i in range(15)], None),
+                sorting_indices=(np.random.permutation(10), None, None))
 
     #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
     #plot(m, variables=[str(i) for i in range(5)])
