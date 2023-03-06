@@ -5,7 +5,7 @@ This library provides tools to perform [sliceTCA](https://www.biorxiv.org/conten
 ___
 
 <p align="center">
-  <img width="700" src="./img/decomposition.svg">
+  <img width="700" src="https://raw.githubusercontent.com/arthur-pe/slicetca/fb51e536afad9bfab60b5fc1def764ad6af1983c/img/decomposition.svg">
 </p>
 
 ## Installation 
