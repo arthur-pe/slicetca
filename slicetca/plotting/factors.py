@@ -7,6 +7,9 @@ def plot(model,
          components: Sequence[Sequence[np.ndarray]] = None,
          variables: Sequence[str] = ('trial', 'neuron', 'time'),
          colors: Union[Sequence[np.ndarray], Sequence[Sequence[float]]] = (None, None, None),
+         sorting_indices: Sequence[np.ndarray] = (None, None, None),
+         ticks: Sequence[np.ndarray] = (None, None, None),
+         tick_labels: Sequence[np.ndarray] = (None, None, None),
          factor_height: int = 2,
          aspect: str = 'auto',
          s: int = 10,
@@ -24,6 +27,9 @@ def plot(model,
                    None or 1-d variable will default to plt.plot, 2-d (trials x RGBA) to scatter.
                    Note that to generate RGBA colors from integer trial condition you may call:
                         colors = matplotlib.colormaps['hsv'](condition/np.max(condition))
+    :param sorting_indices: Sort (e.g. trials) according to indices.
+    :param ticks: Can be used instead of the 0,1, ... default indexing.
+    :param tick_labels: requires ticks
     :param factor_height: Height of the 1-tensor factors. Their length is 3.
     :param aspect: 'auto' will give a square-looking slice, 'equal' will preserve the ratios.
     :param s: size of scatter dots (see colors parameter).
@@ -65,6 +71,8 @@ def plot(model,
 
                     leg = partitions[i][k][0]
 
+                    if sorting_indices[leg] != None: current_component = current_component[sorting_indices]
+
                     if isinstance(colors[leg], np.ndarray) and len(colors[leg].shape) == 2:
                         ax.scatter(np.arange(len(current_component)), current_component, color=colors[leg], s=s)
                     else:
@@ -81,9 +89,13 @@ def plot(model,
 
                     p = (positive if isinstance(positive, bool) else positive[i][k])
 
+                    if sorting_indices[partitions[i][k][0]] != None:
+                        current_component = current_component[sorting_indices]
+                    if sorting_indices[partitions[i][k][1]] != None:
+                        current_component = current_component.T[sorting_indices].T
+
                     if p:
-                        temp = current_component
-                        ax.imshow(temp, aspect=aspect, cmap=(cmap if cmap is not None else 'inferno'))
+                        ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'inferno'))
                     else:
                         min_max = np.quantile(np.abs(current_component),0.95).item()
                         ax.imshow(current_component, aspect=aspect, cmap=(cmap if cmap is not None else 'seismic'),
@@ -94,6 +106,11 @@ def plot(model,
                     variable_y = variables[partitions[i][k][0]]
                     ax.set_xlabel(variable_x)
                     ax.set_ylabel(variable_y)
+
+                    if ticks[partitions[i][k][0]] is not None:
+                        ax.set_yticks(ticks[partitions[i][k][0]], tick_labels[partitions[i][k][0]])
+                    if ticks[partitions[i][k][1]] is not None:
+                        ax.set_xticks(ticks[partitions[i][k][1]], tick_labels[partitions[i][k][1]])
 
                 # =========== Higher order factors can't be plotted ===========
                 elif len(list(components[i][k].shape)) >= 4:
@@ -121,11 +138,13 @@ if __name__=='__main__':
     #m = TCA((10,11,12), 3)
 
     trial_color = matplotlib.colormaps['hsv'](np.random.rand(10))
-    axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60)
+    axes = plot(m, aspect='auto', colors=(trial_color, None, None), dpi=60,
+                ticks=(np.arange(10), np.arange(15), None),
+                tick_labels=([chr(65+i) for i in range(10)], [chr(65+i) for i in range(15)], None))
 
     #m = PartitionTCA((5,10,15,20,25), [[[0],[1,2],[3,4]],[[0],[1],[2,3,4]]], [2,3], initialization='normal')
     #plot(m, variables=[str(i) for i in range(5)])
 
-    axes[1][0][1].axvline(5, color='grey', linestyle='--')
+    #axes[1][0][1].axvline(5, color='grey', linestyle='--')
 
     plt.show()
