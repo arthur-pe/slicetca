@@ -1,4 +1,4 @@
-from slicetca._core.decompositions import SliceTCA
+from slicetca.core.decompositions import SliceTCA
 
 import torch
 from typing import Sequence

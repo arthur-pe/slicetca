@@ -114,7 +114,7 @@ def plot(model,
 
 if __name__=='__main__':
 
-    from slicetca._core.decompositions import SliceTCA, TCA, PartitionTCA
+    from slicetca.core.decompositions import SliceTCA, TCA, PartitionTCA
     import matplotlib
 
     m = SliceTCA((10,15,20),(1,3,1), positive=True)

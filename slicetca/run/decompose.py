@@ -1,4 +1,4 @@
-from slicetca._core import SliceTCA, TCA
+from slicetca.core import SliceTCA, TCA
 
 import torch
 from typing import Union, Sequence

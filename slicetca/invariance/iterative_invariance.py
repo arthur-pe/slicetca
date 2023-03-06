@@ -1,6 +1,6 @@
 from .transformations import *
 from .criteria import *
-from .._core.decompositions import SliceTCA
+from ..core.decompositions import SliceTCA
 
 import torch
 import copy

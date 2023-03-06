@@ -1,8 +1,8 @@
-from slicetca._core.decompositions import PartitionTCA, SliceTCA
+from slicetca.core.decompositions import PartitionTCA, SliceTCA
 from slicetca.invariance.analytic_invariance import svd_basis
 from slicetca.invariance.iterative_invariance import TransformationWithin, TransformationBetween, sgd_invariance, l2
-from slicetca._run.decompose import decompose
-from slicetca._run.grid_search import grid_search
+from slicetca.run.decompose import decompose
+from slicetca.run.grid_search import grid_search
 
 import torch
 from torch import nn

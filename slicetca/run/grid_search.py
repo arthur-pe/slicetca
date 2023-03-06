@@ -1,4 +1,4 @@
-from slicetca._run.decompose import decompose
+from slicetca.run.decompose import decompose
 
 from multiprocessing import Pool
 import multiprocessing as mp

@@ -1,6 +1,6 @@
-from slicetca.invariance import *
-from ._plotting import *
-from ._run import *
+from .invariance import *
+from .plotting import *
+from .run import *
 
 __version__ = '0.1.4'
 __author__ = 'Arthur Pellegrino, Heike Stein'
