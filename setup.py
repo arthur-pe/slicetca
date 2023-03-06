@@ -2,12 +2,16 @@ from setuptools import setup
 
 setup(
     name='slicetca',
+    packages=['slicetca'],
     version='0.1.1',
+
     description='Package to perform Slice Tensor Component Analysis',
+    long_description='README.md',
+    long_description_content_type='text/markdown',
+
     url='https://github.com/arthur-pe/slicetca',
     author='Arthur Pellegrino',
     license='MIT',
-    packages=['slicetca'],
     install_requires=['torch',
                       'numpy',
                       'matplotlib',
