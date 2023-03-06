@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='slicetca',
     packages=['slicetca'],
-    version='0.1.1',
+    version='0.1.2',
 
     description='Package to perform Slice Tensor Component Analysis',
     long_description='README.md',
