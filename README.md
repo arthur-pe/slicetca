@@ -44,7 +44,11 @@ plt.show()
 
 ### Notebook
 
-See the [example notebook]() for an application of sliceTCA to publicly available neural data.
+See the [example notebook](https://github.com/arthur-pe/slicetca/blob/master/sliceTCA_notebook_1.ipynb) for an application of sliceTCA to publicly available neural data.
+
+<a target="_blank" href="https://colab.research.google.com/github/arthur-pe/slicetca/blob/master/sliceTCA_notebook_1.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 ## Reference
 
