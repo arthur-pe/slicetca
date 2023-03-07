@@ -35,6 +35,7 @@ data = torch.tensor(your_data, dtype=torch.float, device=device)
 # The tensor is decomposed into 2 trial-, 0 neuron- and 3 time-slicing components.
 components, model = slicetca.decompose(data, (2,0,3))
 
+# For a not positive decomposition, we apply uniqueness constraints
 model = slicetca.invariance(model)
 
 slicetca.plot(model)
