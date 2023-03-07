@@ -82,6 +82,9 @@ def plot(model,
                         ax.plot(np.arange(len(current_component)), current_component,
                                 color=(0.0, 0.0, 0.0) if colors[leg] is None else colors[leg])
 
+                    if ticks[partitions[i][k][0]] is not None:
+                        ax.set_xticks(ticks[partitions[i][k][0]], tick_labels[partitions[i][k][0]])
+
                     ax.set_xlabel(variables[leg])
 
                 # =========== Plots 2-tensor factors (slices) ===========
