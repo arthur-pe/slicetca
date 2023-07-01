@@ -74,7 +74,7 @@ def decompose_mp_sample(number_components_seed, data, mask_train, mask_test, sam
 
     np.random.seed(seed)
 
-    print('Starting fitting components:', number_components)
+    print('Starting fitting components:', number_components, flush=True)
 
     dec = partial(decompose_mp,
                   data=data.clone(),
