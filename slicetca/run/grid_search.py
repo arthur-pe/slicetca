@@ -40,7 +40,6 @@ def grid_search(data: Union[torch.Tensor, np.array],
 
     try:
         mp.set_start_method('spawn', force=True)
-        print('Spawned')
     except RuntimeError:
         pass
 
