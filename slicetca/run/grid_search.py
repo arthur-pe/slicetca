@@ -38,7 +38,10 @@ def grid_search(data: Union[torch.Tensor, np.array],
 
     np.random.seed(seed)
 
-    mp.set_start_method('spawn')
+    try:
+        mp.set_start_method('spawn', force=True)
+    except RuntimeError:
+        pass
 
     if min_ranks is None: min_ranks = [0 for i in max_ranks]
     max_ranks = [i+1 for i in max_ranks]
