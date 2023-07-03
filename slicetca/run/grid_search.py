@@ -1,15 +1,14 @@
 from slicetca.run.decompose import decompose
 
-#from multiprocessing import Pool
 import multiprocessing as mp
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor as Pool
+from tqdm import tqdm
 import torch
 import numpy as np
 
 from typing import Sequence, Union
 
-from tqdm import tqdm
 
 def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tensor atm
                 max_ranks: Sequence[int],
@@ -51,8 +50,10 @@ def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tens
     grid = get_grid_sample(min_ranks, max_ranks)
     grid = np.concatenate([grid, np.random.randint(10**2,10**6, grid.shape[0])[:,np.newaxis]], axis=-1)
 
-    print('Grid size:', str(rank_span), '- sample:', sample_size,
-          '- total_fit:', torch.tensor(grid).size()[0]*sample_size)
+    print('Grid shape:', str(rank_span),
+          '- Samples:', sample_size,
+          '- Grid entries:', torch.tensor(grid).size()[0],
+          '- Number of models to fit:', torch.tensor(grid).size()[0]*sample_size)
 
     dec = partial(decompose_mp_sample, data=data, mask_train=mask_train, mask_test=mask_test, sample_size=sample_size,
                   processes_sample=processes_sample, **kwargs)
