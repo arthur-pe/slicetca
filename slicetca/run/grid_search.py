@@ -1,6 +1,6 @@
 from slicetca.run.decompose import decompose
 
-from multiprocessing import Pool
+#from multiprocessing import Pool
 import multiprocessing as mp
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor as Pool
@@ -9,8 +9,9 @@ import numpy as np
 
 from typing import Sequence, Union
 
+from tqdm import tqdm
 
-def grid_search(data: Union[torch.Tensor, np.array],
+def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tensor atm
                 max_ranks: Sequence[int],
                 mask_train: torch.Tensor = None,
                 mask_test: torch.Tensor = None,
@@ -56,7 +57,13 @@ def grid_search(data: Union[torch.Tensor, np.array],
     dec = partial(decompose_mp_sample, data=data, mask_train=mask_train, mask_test=mask_test, sample_size=sample_size,
                   processes_sample=processes_sample, **kwargs)
 
-    with Pool(max_workers=processes_grid) as pool: out_grid = np.array(list(pool.map(dec, grid)), dtype=np.float32)
+    out_grid = []
+    with Pool(max_workers=processes_grid) as pool:
+        iterator = tqdm(pool.map(dec, grid), total=torch.tensor(grid).size()[0])
+        for i, p in enumerate(iterator):
+            out_grid.append(p)
+            iterator.set_description('Number of components: '+str(np.unravel_index(i, tuple(max_ranks))), refresh=True)
+    out_grid = np.array(out_grid, dtype=np.float32)
 
     loss_grid = out_grid[:,0]
     seed_grid = out_grid[:,1].astype(int)
@@ -73,8 +80,6 @@ def decompose_mp_sample(number_components_seed, data, mask_train, mask_test, sam
     seed = number_components_seed[-1]
 
     np.random.seed(seed)
-
-    print('Starting fitting components:', number_components, flush=True)
 
     dec = partial(decompose_mp,
                   data=data.clone(),
