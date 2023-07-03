@@ -61,7 +61,7 @@ def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tens
     out_grid = []
     with Pool(max_workers=processes_grid) as pool:
         iterator = tqdm(pool.map(dec, grid), total=torch.tensor(grid).size()[0])
-        iterator.set_description('Number of components (completed): ', refresh=True)
+        iterator.set_description('Number of components (completed): - ', refresh=True)
         for i, p in enumerate(iterator):
             out_grid.append(p)
             iterator.set_description('Number of components (completed): '+str(np.unravel_index(i, tuple(max_ranks))), refresh=True)
