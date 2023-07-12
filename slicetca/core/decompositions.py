@@ -2,8 +2,10 @@ import torch
 from torch import nn
 import numpy as np
 import tqdm
+from collections.abc import Iterable
 
 from typing import Sequence, Union, Callable
+
 
 class PartitionTCA(nn.Module):
 
@@ -13,8 +15,8 @@ class PartitionTCA(nn.Module):
                  ranks: Sequence[int],
                  positive: Union[bool, Sequence[Sequence[Callable]]] = False,
                  initialization: str = 'uniform',
-                 init_weight: float = 1.0,
-                 init_bias: float = 0.0,
+                 init_weight: float = None,
+                 init_bias: float = None,
                  device: str = 'cpu'):
         """
         Parent class for the sliceTCA and TCA decompositions.
@@ -36,6 +38,12 @@ class PartitionTCA(nn.Module):
 
         components = [[[dimensions[k] for k in j] for j in i] for i in partitions]
 
+        if init_weight is None:
+            if initialization == 'normal': init_weight = 1/np.sqrt(sum(ranks))
+            if initialization == 'uniform-positive': init_weight = ((0.5 / sum(ranks)) ** (1 / max([len(p) for p in partitions])))*2
+            if initialization == 'uniform': init_weight = 1/np.sqrt(sum(ranks))
+        if init_bias is None: init_bias = 0.0
+
         if isinstance(positive, bool):
             if positive: positive_function = [[torch.abs for j in i] for i in partitions]
             else: positive_function = [[self.identity for j in i] for i in partitions]
@@ -44,16 +52,16 @@ class PartitionTCA(nn.Module):
         vectors = nn.ModuleList([])
 
         for i in range(len(ranks)):
-            rank = ranks[i]
+            r = ranks[i]
             dim = components[i]
 
             # k-tensors of the outer product
             if initialization == 'normal':
-                v = [nn.Parameter(positive_function[i][j](torch.randn([rank]+d, device=device))) for j, d in enumerate(dim)]
+                v = [nn.Parameter(positive_function[i][j](torch.randn([r]+d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
             elif initialization == 'uniform':
-                v = [nn.Parameter(positive_function[i][j](torch.rand([rank] + d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
+                v = [nn.Parameter(positive_function[i][j](2*(torch.rand([r] + d, device=device)-0.5)*init_weight + init_bias)) for j, d in enumerate(dim)]
             elif initialization == 'uniform-positive':
-                v = [nn.Parameter(positive_function[i][j]((2*torch.rand([rank] + d, device=device)-1)*init_weight + init_bias)) for j, d in enumerate(dim)]
+                v = [nn.Parameter(positive_function[i][j](torch.rand([r] + d, device=device)*init_weight + init_bias)) for j, d in enumerate(dim)]
             else:
                 raise Exception('Undefined initialization, select one of : normal, uniform, uniform-positive')
 
@@ -254,8 +262,8 @@ class SliceTCA(PartitionTCA):
                  ranks: Sequence[int], 
                  positive: bool = False, 
                  initialization: str = 'uniform',
-                 init_weight: float = 1.0, 
-                 init_bias: float = 0.0, 
+                 init_weight: float = None,
+                 init_bias: float = None,
                  device: str = 'cpu'):
         """
         Main sliceTCA decomposition class.
@@ -284,8 +292,8 @@ class TCA(PartitionTCA):
                  rank: int,
                  positive: bool = False,
                  initialization: str = 'uniform',
-                 init_weight: float = 1.0,
-                 init_bias: float = 0.0,
+                 init_weight: float = None,
+                 init_bias: float = None,
                  device: str = 'cpu'):
         """
         Main TCA decomposition class.
@@ -301,7 +309,7 @@ class TCA(PartitionTCA):
         :param device: Torch device.
         """
 
-        if type(rank) is not tuple:
+        if not isinstance(rank, Iterable):
             rank = (rank,)
 
         valence = len(dimensions)

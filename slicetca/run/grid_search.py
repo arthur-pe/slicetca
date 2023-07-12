@@ -10,6 +10,8 @@ import numpy as np
 from typing import Sequence, Union
 
 
+# To be fixed: high memory usage when using GPU.
+
 def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tensor atm
                 max_ranks: Sequence[int],
                 mask_train: torch.Tensor = None,
@@ -85,8 +87,8 @@ def decompose_mp_sample(number_components_seed, data, mask_train, mask_test, sam
 
     dec = partial(decompose_mp,
                   data=data.clone(),
-                  mask_train=(mask_train.clone().float() if mask_train is not None else None),
-                  mask_test=(mask_test.clone().float() if mask_test is not None else None),
+                  mask_train=(mask_train.clone() if mask_train is not None else None),
+                  mask_test=(mask_test.clone() if mask_test is not None else None),
                   **kwargs)
 
     sample = number_components[np.newaxis].repeat(sample_size, 0)
@@ -111,7 +113,7 @@ def decompose_mp(number_components_seed, data, mask_train, mask_test, *args, **k
         data_hat = model.construct()
 
     if mask_test is None: loss = torch.mean((data-data_hat)**2).item()
-    else: loss = torch.mean(((data-data_hat)*(1-mask_test))**2).item()
+    else: loss = torch.mean(((data-data_hat)[mask_test])**2).item()
 
     return loss
 

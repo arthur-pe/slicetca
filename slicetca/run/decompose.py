@@ -8,7 +8,7 @@ import numpy as np
 def decompose(data: Union[torch.Tensor, np.array],
               number_components: Union[Sequence[int], int],
               positive: bool = False,
-              initialization: str = 'uniform',
+              initialization: str = None,
               learning_rate: float = 5*10**-3,
               batch_prop: float = 0.2,
               max_iter: int = 10000,
@@ -46,6 +46,8 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     if isinstance(data, np.ndarray): data = torch.tensor(data, device='cuda' if torch.cuda.is_available() else 'cpu')
 
+    if initialization is None: initialization = 'uniform-positive' if positive else 'uniform'
+
     dimensions = list(data.shape)
 
     if isinstance(number_components, int): decomposition = TCA
@@ -60,4 +62,3 @@ def decompose(data: Union[torch.Tensor, np.array],
         model.fit(data, optimizer, 1-(1-batch_prop)**i, max_iter, min_std, iter_std, mask, verbose, progress_bar)
 
     return model.get_components(numpy=True), model
-
