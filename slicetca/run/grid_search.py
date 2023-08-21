@@ -12,7 +12,7 @@ from typing import Sequence, Union
 
 # To be fixed: high memory usage when using GPU.
 
-def grid_search(data: Union[torch.Tensor, np.array], #Only works with torch.Tensor atm
+def grid_search(data: Union[torch.Tensor], # Only works with torch.Tensor atm
                 max_ranks: Sequence[int],
                 mask_train: torch.Tensor = None,
                 mask_test: torch.Tensor = None,
@@ -120,7 +120,8 @@ def decompose_mp(number_components_seed, data, mask_train, mask_test, *args, **k
 
 def get_grid_sample(min_dims, max_dims):
 
-    grid = np.meshgrid(*[np.array([i for i in range(min_dims[j],max_dims[j])]) for j in range(len(max_dims))])
+    grid = np.meshgrid(*[np.array([i for i in range(min_dims[j],max_dims[j])]) for j in range(len(max_dims))],
+                       indexing='ij')
 
     grid = np.stack(grid)
 

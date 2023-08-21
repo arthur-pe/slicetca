@@ -21,7 +21,8 @@ def invariance(model: SliceTCA,
     :return: model with modified components.
     """
 
-    model = sgd_invariance(model, objective_function=dict_L2_invariance_objectives[L2], **kwargs)
+    if sum([r!=0 for r in model.ranks])>1:
+        model = sgd_invariance(model, objective_function=dict_L2_invariance_objectives[L2], **kwargs)
     model = dict_L3_invariance_functions[L3](model, **kwargs)
 
     return model

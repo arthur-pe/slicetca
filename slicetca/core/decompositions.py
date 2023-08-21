@@ -1,3 +1,5 @@
+from .helper_functions import squared_difference
+
 import torch
 from torch import nn
 import numpy as np
@@ -196,21 +198,23 @@ class PartitionTCA(nn.Module):
                         self.vectors[i][j].copy_(torch.tensor(components[i][j], device=self.device))
         self.zero_grad()
 
-    def fit(self, 
-            X: torch.Tensor, 
-            optimizer: torch.optim.Optimizer, 
-            batch_prop: float = 0.2, 
-            max_iter: int = 10000, 
-            min_std: float = 10**-3, 
-            iter_std: int = 100, 
-            mask: torch.Tensor = None, 
+    def fit(self,
+            X: torch.Tensor,
+            optimizer: torch.optim.Optimizer,
+            loss_function: Callable = squared_difference,
+            batch_prop: float = 0.2,
+            max_iter: int = 10000,
+            min_std: float = 10 ** -3,
+            iter_std: int = 100,
+            mask: torch.Tensor = None,
             verbose: bool = False,
             progress_bar: bool = True):
         """
         Fits the model to data.
-        
+
         :param X: The data tensor.
         :param optimizer: A torch optimizer.
+        :param loss_function: The final loss if torch.mean(loss_function(X, X_hat)). That is, loss_function: R^n -> R^n.
         :param batch_prop: Proportion of entries used to compute the gradient at every training iteration.
         :param max_iter: Maximum training iterations.
         :param min_std: Minimum std of the loss under which to return.
@@ -228,29 +232,39 @@ class PartitionTCA(nn.Module):
 
             X_hat = self.construct()
 
-            dX = X-X_hat
+            loss_entries = loss_function(X, X_hat)
 
-            if mask is not None: dX = dX * mask
+            total_loss = torch.mean(loss_entries)
 
-            with torch.no_grad(): total_loss = torch.mean(torch.square(dX)).item() #should be divided by prop masked entries
+            if batch_prop != 1.0: batch_mask = torch.rand(self.dimensions, device=self.device) < batch_prop
 
-            if batch_prop != 1.0:
-                dX = dX*(torch.rand(self.dimensions, device=self.device)<batch_prop)
-                loss = torch.mean(torch.square(dX))/batch_prop
+            if mask is None and batch_prop == 1.0:
+                loss = total_loss
             else:
-                loss = torch.mean(torch.square(dX))
+                if mask is None:
+                    total_mask = batch_mask
+                else:
+                    if batch_prop == 1.0:
+                        total_mask = mask
+                    else:
+                        total_mask = mask & batch_mask
+
+                total_entries = torch.sum(total_mask)
+                loss = torch.sum(loss_entries * total_mask) / total_entries
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
+            total_loss = total_loss.item()
+
             losses.append(total_loss)
 
-            if verbose: print('Iteration:', iteration, 'MSE loss:', total_loss)
-            if progress_bar: iterator.set_description('MSE loss: ' + str(total_loss) + ' ')
+            if verbose: print('Iteration:', iteration, 'Loss:', total_loss)
+            if progress_bar: iterator.set_description('Loss: ' + str(total_loss) + ' ')
 
-            if len(losses)>iter_std and np.array(losses[-iter_std:]).std()<min_std:
-                if progress_bar: iterator.set_description('The model converged. MSE loss: ' + str(total_loss) + ' ')
+            if len(losses) > iter_std and np.array(losses[-iter_std:]).std() < min_std:
+                if progress_bar: iterator.set_description('The model converged. Loss: ' + str(total_loss) + ' ')
                 break
 
         self.losses += losses

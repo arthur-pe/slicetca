@@ -1,19 +1,22 @@
 from slicetca.core import SliceTCA, TCA
+from slicetca.core.helper_functions import squared_difference, poisson_log_likelihood
 
 import torch
 from typing import Union, Sequence
 import numpy as np
+import scipy
+from functools import partial
 
 
 def decompose(data: Union[torch.Tensor, np.array],
               number_components: Union[Sequence[int], int],
               positive: bool = False,
-              initialization: str = None,
+              initialization: str = 'uniform',
               learning_rate: float = 5*10**-3,
               batch_prop: float = 0.2,
               max_iter: int = 10000,
               min_std: float = 10**-5,
-              iter_std: int = 200,
+              iter_std: int = 100,
               mask: torch.Tensor = None,
               verbose: bool = False,
               progress_bar: bool = True,
@@ -46,7 +49,11 @@ def decompose(data: Union[torch.Tensor, np.array],
 
     if isinstance(data, np.ndarray): data = torch.tensor(data, device='cuda' if torch.cuda.is_available() else 'cpu')
 
-    if initialization is None: initialization = 'uniform-positive' if positive else 'uniform'
+    if data.dtype != torch.long:
+        loss_function = squared_difference
+    else:
+        spikes_factorial = torch.tensor(scipy.special.factorial(data.numpy(force=True)), device=data.device)
+        loss_function = partial(poisson_log_likelihood, spikes_factorial=spikes_factorial)
 
     dimensions = list(data.shape)
 
@@ -59,6 +66,7 @@ def decompose(data: Union[torch.Tensor, np.array],
     else: optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     for i in range(1,batch_prop_decay+1):
-        model.fit(data, optimizer, 1-(1-batch_prop)**i, max_iter, min_std, iter_std, mask, verbose, progress_bar)
+        model.fit(data, optimizer, loss_function,
+                  1-(1-batch_prop)**i, max_iter, min_std, iter_std, mask, verbose, progress_bar)
 
     return model.get_components(numpy=True), model
