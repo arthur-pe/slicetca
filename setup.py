@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 setup(
     name='slicetca',
     packages=find_packages(exclude=['tests*']),
-    version='1.0.3',
+    version='1.0.4',
 
     description='Package to perform Slice Tensor Component Analysis',
     long_description=long_description,
