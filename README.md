@@ -53,4 +53,4 @@ See the [example notebook](https://github.com/arthur-pe/slicetca/blob/master/sli
 
 ## Reference
 
-A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>. (2023). Disentangling Mixed Classes of Covariability in Large-Scale Neural Data. [https://www.biorxiv.org/content/10.1101/2023.03.01.530616v1](https://www.biorxiv.org/content/10.1101/2023.03.01.530616v1).
+A. Pellegrino<sub>@</sub><sup>†</sup>, H. Stein<sup>†</sup>, N. A. Cayco-Gaijc<sub>@</sub>. (2024). Dimensionality reduction beyond neural subspaces with slice tensor component analysis. *Nature Neuroscience* [https://www.nature.com/articles/s41593-024-01626-2](https://www.nature.com/articles/s41593-024-01626-2).
