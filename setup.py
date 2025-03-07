@@ -22,7 +22,7 @@ setup(
                       'tqdm',
                       'scipy'
                       ],
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     classifiers=[
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
